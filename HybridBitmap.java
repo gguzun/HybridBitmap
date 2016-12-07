@@ -392,11 +392,11 @@ public final class HybridBitmap implements Cloneable, Serializable,
 			this.andToContainer(a, container);
 			}
 		}
-		container.age = Math.max(this.age, a.age)+1;
-		if(container.age>20){	
-			container.density=container.cardinality();
-		container.age=0;
-		}
+//		container.age = Math.max(this.age, a.age)+1;
+//		if(container.age>20){	
+//			container.density=container.cardinality();
+//		container.age=0;
+//		}
 		return container;		
 	}
   
@@ -428,16 +428,17 @@ public final class HybridBitmap implements Cloneable, Serializable,
 			container.reserve(this.actualsizeinwords + a.actualsizeinwords);
 			orToContainer(a, container);}
 		}
-		container.age = Math.max(this.age, a.age)+1;
-		if(container.age>20){	
-			container.density=container.cardinality();
-		container.age=0;
-		}
+//		container.age = Math.max(this.age, a.age)+1;
+//		if(container.age>20){	
+//			container.density=container.cardinality();
+//		container.age=0;
+//		}
 		return container;
 	}
 
 	public HybridBitmap xor(final HybridBitmap a) {
 		final HybridBitmap container = new HybridBitmap();
+		
 		//double expDens = (this.setbits+a.setbits)/(double)(this.sizeinbits)-(this.setbits*a.setbits)/(double)(this.sizeinbits*a.sizeinbits);
 		//double expDens = this.setbits/(double)this.sizeinbits*(a.sizeinbits-a.setbits)/(double)a.sizeinbits+a.setbits/(double)a.sizeinbits*(this.sizeinbits-this.setbits)/(double)this.sizeinbits;
 		container.density=this.density*(1-a.density)+a.density*(1-this.density);
@@ -454,13 +455,38 @@ public final class HybridBitmap implements Cloneable, Serializable,
 			container.reserve(this.actualsizeinwords + a.actualsizeinwords);
 			xorToContainer(a, container);}
 		}
-		container.age = Math.max(this.age, a.age)+1;
-		if(container.age>20){	
-			container.density=container.cardinality();
-		container.age=0;
-		}
+//		container.age = Math.max(this.age, a.age)+1;
+//		if(container.age>20){	
+//			container.density=container.cardinality();
+//		container.age=0;
+//		}
 		return container;
 	}
+	
+	
+	public HybridBitmap xorNot(final HybridBitmap a) {
+		final HybridBitmap container = new HybridBitmap();
+		
+		//double expDens = (this.setbits+a.setbits)/(double)(this.sizeinbits)-(this.setbits*a.setbits)/(double)(this.sizeinbits*a.sizeinbits);
+		//double expDens = this.setbits/(double)this.sizeinbits*(a.sizeinbits-a.setbits)/(double)a.sizeinbits+a.setbits/(double)a.sizeinbits*(this.sizeinbits-this.setbits)/(double)this.sizeinbits;
+		container.density=this.density*(a.density)+(1-a.density)*(1-this.density);
+		//    container.sizeinbits=this.sizeinbits;
+		if (this.verbatim && a.verbatim) {
+			xorNotVerbatim(a, container);
+		}else if(this.verbatim || a.verbatim){
+			this.xorNotHybrid(a, container);
+		}else{			
+			container.reserve(this.actualsizeinwords + a.actualsizeinwords);
+			xorNotToContainer(a, container);
+		}
+//		container.age = Math.max(this.age, a.age)+1;
+//		if(container.age>20){	
+//			container.density=container.cardinality();
+//		container.age=0;
+//		}
+		return container;
+	}
+	
 
 	public HybridBitmap andNot(final HybridBitmap a) {
 	    final HybridBitmap container = new HybridBitmap();
@@ -472,7 +498,8 @@ public final class HybridBitmap implements Cloneable, Serializable,
 	    	if(Math.min(this.density, (1-a.density))<andThreshold){
 					if(this.density==0){
 						container.verbatim=false;
-						container.addStreamOfEmptyWords(false, (this.sizeinbits>>>6));
+						//container.addStreamOfEmptyWords(false, (this.sizeinbits>>>6));
+						container.setSizeInBits(this.sizeinbits,false);
 						container.density=0;
 					}else{					
 					this.andNotVerbatimCompress(a, container);	}				
@@ -485,23 +512,25 @@ public final class HybridBitmap implements Cloneable, Serializable,
 			} else if(this.verbatim || a.verbatim) {
 				if(this.density==0){
 					container.verbatim=false;
-					container.addStreamOfEmptyWords(false, (this.sizeinbits>>>6));
+					//container.addStreamOfEmptyWords(false, (this.sizeinbits>>>6));
+					container.setSizeInBits(this.sizeinbits,false);
 				}else{
 				this.andNotHybridCompress(a, container);}
 				
 			}else{
 				if(this.density==0){
 					container.verbatim=false;
-					container.addStreamOfEmptyWords(false, (this.sizeinbits>>>6));
+					//container.addStreamOfEmptyWords(false, (this.sizeinbits>>>6));
+					container.setSizeInBits(this.sizeinbits,false);
 				}else{
 				container.reserve(this.actualsizeinwords > a.actualsizeinwords ? this.actualsizeinwords : a.actualsizeinwords);
 				this.andNotToContainer(a, container);}
 			}
-	    container.age = Math.max(this.age, a.age)+1;
-		if(container.age>20){	
-			container.density=container.cardinality();
-		container.age=0;
-		}
+//	    container.age = Math.max(this.age, a.age)+1;
+//		if(container.age>20){	
+//			container.density=container.cardinality();
+//		container.age=0;
+//		}
 			return container;
 		}
 	
@@ -529,6 +558,7 @@ public final class HybridBitmap implements Cloneable, Serializable,
 	 public HybridBitmap andNotV(final HybridBitmap a) {
 	 	  
 		    final HybridBitmap container = new HybridBitmap();
+		    container.density=this.density*(1-a.density);
 		    this.andNotVerbatim(a, container);	
 		    return container;
 	  }
@@ -744,29 +774,70 @@ public final class HybridBitmap implements Cloneable, Serializable,
 	 * @return
 	 */
 	public HybridBitmap xor( final HybridBitmap a, final HybridBitmap b) {
-		HybridBitmap container = new HybridBitmap(true, this.actualsizeinwords);		
-
+		HybridBitmap container = new HybridBitmap(true, this.actualsizeinwords);
+		double temp=this.density*(1-a.density)+a.density*(1-this.density);
+		container.density=temp*(1-b.density)+b.density*(1-temp);
 		for (int i = 0; i < this.actualsizeinwords; i++) {
 			container.buffer[i] = this.buffer[i] ^ a.buffer[i] ^ b.buffer[i];
 		}
 
 		container.actualsizeinwords = this.actualsizeinwords;
 		//container.sizeinbits = this.actualsizeinwords <<6;
-		container.sizeinbits = Math.max(b.sizeinbits, Math.max(this.sizeinbits, a.sizeinbits));
+		container.sizeinbits =this.sizeinbits;
 		return container;
 
 	}
 	
 	public HybridBitmap maj(final HybridBitmap a, final HybridBitmap b){
 		HybridBitmap container = new HybridBitmap(true, this.actualsizeinwords);
+		double ab = this.density*a.density;
+		double bc = a.density*b.density;
+		double ac = this.density*b.density;
+		container.density = ab+bc-ab*bc+ac-(ab+bc-ab*bc)*ac;
 		for (int i = 0; i < this.actualsizeinwords; i++) {
 			container.buffer[i] = (this.buffer[i] & a.buffer[i]) | (a.buffer[i] & b.buffer[i])
 		              | (this.buffer[i] & b.buffer[i]);
 		}
 		container.actualsizeinwords = this.actualsizeinwords;
-		container.sizeinbits = Math.max(b.sizeinbits, Math.max(this.sizeinbits, a.sizeinbits));
+		container.sizeinbits = this.sizeinbits;
 		return container;
 	}
+	
+	public HybridBitmap orAndNotV(final HybridBitmap a, final HybridBitmap b){
+		HybridBitmap container = new HybridBitmap(true, this.actualsizeinwords);
+		double multDens = a.density*(1-b.density);
+		container.density = this.density+multDens - (this.density*multDens);
+		for(int i=0; i<this.actualsizeinwords;i++){
+			container.buffer[i]= this.buffer[i]|(a.buffer[i]&(~b.buffer[i]));
+		}
+		container.actualsizeinwords=this.actualsizeinwords;
+		container.sizeinbits = this.sizeinbits;
+		return container;
+	}
+	
+	public HybridBitmap orAndV(final HybridBitmap a, HybridBitmap b){
+		HybridBitmap container = new HybridBitmap(true, this.actualsizeinwords);
+		double andDens = a.density*b.density;
+		container.density = this.density+andDens-(this.density*andDens);
+		for(int i=0; i<this.actualsizeinwords;i++){
+			container.buffer[i]= this.buffer[i]|(a.buffer[i]&b.buffer[i]);
+		}
+		container.actualsizeinwords=this.actualsizeinwords;
+		container.sizeinbits = this.sizeinbits;
+		return container;
+	}
+	
+	public HybridBitmap andV(final HybridBitmap a, HybridBitmap b){
+		HybridBitmap container = new HybridBitmap(true, this.actualsizeinwords);
+		container.density = this.density*a.density*b.density;
+		for(int i=0; i<this.actualsizeinwords;i++){
+			container.buffer[i]= this.buffer[i]& a.buffer[i]&b.buffer[i];
+		}
+		container.actualsizeinwords=this.actualsizeinwords;
+		container.sizeinbits =  this.sizeinbits;
+		return container;
+	}
+	
 
 	public void xorVerbatim(final HybridBitmap a, final HybridBitmap container) {
 		container.reserve(this.actualsizeinwords);
@@ -774,6 +845,20 @@ public final class HybridBitmap implements Cloneable, Serializable,
 
 		for (int i = 0; i < this.actualsizeinwords; i++) {
 			container.buffer[i] = this.buffer[i] ^ a.buffer[i];
+		}
+
+		container.actualsizeinwords = this.actualsizeinwords;
+		//container.sizeinbits = this.actualsizeinwords <<6;
+		container.sizeinbits = Math.max(this.sizeinbits, a.sizeinbits);
+
+	}
+	
+	public void xorNotVerbatim(final HybridBitmap a, final HybridBitmap container) {
+		container.reserve(this.actualsizeinwords);
+		container.verbatim = true;
+
+		for (int i = 0; i < this.actualsizeinwords; i++) {
+			container.buffer[i] = this.buffer[i] ^ (~a.buffer[i]);
 		}
 
 		container.actualsizeinwords = this.actualsizeinwords;
@@ -1307,6 +1392,80 @@ public final class HybridBitmap implements Cloneable, Serializable,
 		container.sizeinbits = Math.max(this.sizeinbits, a.sizeinbits);
 
 	}
+	
+	
+	public void xorNotHybrid(final HybridBitmap a, final HybridBitmap container) {
+		container.verbatim=true;
+		int j = 0;
+		int i=0;
+		int runLength=0;
+		
+		
+
+		if (this.verbatim) { // this is verbatim
+			container.reserve(this.actualsizeinwords);
+			a.rlw = new RunningLengthWord(a.buffer, 0);
+			
+			while (i < this.actualsizeinwords) {
+				runLength=(int) a.rlw.getRunningLength();
+				if (a.rlw.getRunningBit()) { // fill of ones
+					for (j = 0; j < runLength; j++) {						
+						container.buffer[i]=(this.buffer[i]);
+						i++;
+					}
+				} else {
+					for (j = 0; j < runLength; j++) {						
+						container.buffer[i]=~(this.buffer[i]);
+						i++;
+					}
+				}
+
+				for( j=0; j<a.rlw.getNumberOfLiteralWords(); j++){					
+					container.buffer[i]=this.buffer[i]^(~a.buffer[a.rlw.position+j+1]);
+					i++;
+				}
+				a.rlw.position += a.rlw.getNumberOfLiteralWords() + 1;
+				
+
+			}
+		} else { // a is verbatim
+			container.reserve(a.actualsizeinwords);
+			this.rlw = new RunningLengthWord(this.buffer, 0);
+			
+			while (i < a.actualsizeinwords) {
+				runLength=(int) this.rlw.getRunningLength();
+				if (this.rlw.getRunningBit()) { // fill of ones
+					for (j = 0; j < runLength; j++) {						
+						container.buffer[i]=(a.buffer[i]);
+						i++;
+					}
+				} else {
+					for (j = 0; j < runLength; j++) {						
+						container.buffer[i]=~(a.buffer[i]);
+						i++;
+					}
+				}
+
+				for( j=0; j<this.rlw.getNumberOfLiteralWords(); j++){
+//					if((this.rlw.position+j+1)>=this.buffer.length)
+//						System.out.println("ERROR C has broblems. buffer size: "+this.buffer.length);
+//					if(i>=a.buffer.length)
+//						System.out.println("ERROR Verbatim has broblems. Num of bits: "+a.sizeinbits);
+					container.buffer[i]=(~a.buffer[i])^(this.buffer[this.rlw.position+j+1]);
+					i++;
+				}
+				this.rlw.position += this.rlw.getNumberOfLiteralWords() + 1;
+				
+
+			}
+			
+		}
+		
+		container.actualsizeinwords=i;
+		//container.sizeinbits=container.actualsizeinwords<<6;
+		container.sizeinbits = Math.max(this.sizeinbits, a.sizeinbits);
+
+	}
 
 
 	public void setVerbatim(boolean verbatimFlag) {
@@ -1520,7 +1679,7 @@ public final class HybridBitmap implements Cloneable, Serializable,
 	  }
 	  else{
 		  this.rlw.position=0;
-		  boolean res=false;
+		  boolean res=false;		  
 		  while(curPos<=wordPos){			  
 			  if(curPos+this.rlw.getRunningLength()>wordPos){
 				  res = this.rlw.getRunningBit();
@@ -1682,7 +1841,7 @@ public final class HybridBitmap implements Cloneable, Serializable,
 			int ntz = 0;
 			long data = 0;
 			int vpos=0;
-			int pos=1;
+			int pos=0;
 			for (int i = 0; i < this.actualsizeinwords; i++) {
 				data = this.buffer[i];
 				//if (data > 0) {
@@ -1962,6 +2121,7 @@ public final class HybridBitmap implements Cloneable, Serializable,
    * 
    */
   public void not() {
+	  this.density=1-this.density;
 	  if (this.verbatim){
 		  for(int i=0; i < this.buffer.length; i++){
 			  this.buffer[i]=~this.buffer[i];
@@ -1995,6 +2155,25 @@ public final class HybridBitmap implements Cloneable, Serializable,
       }
     }
   }}
+  
+  
+  
+  
+  public HybridBitmap NOT() {		  
+		 
+		HybridBitmap res = null;
+		try {
+			res = (HybridBitmap) this.clone();
+		} catch (CloneNotSupportedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		  res.not();
+		  return res;
+	  
+	  
+  }
 
   /**
    * Returns a new compressed bitmap containing the bitwise OR values of the
@@ -2279,7 +2458,9 @@ public final class HybridBitmap implements Cloneable, Serializable,
     // distance in words:
     final int dist = (i + wordinbits) / wordinbits
       - (this.sizeinbits + wordinbits - 1) / wordinbits;
+    this.density = ((this.density*this.sizeinbits)+1)/(i+1);
     this.sizeinbits = i + 1;
+    
     if (dist > 0) {// easy
       if (dist > 1)
         fastaddStreamOfEmptyWords(false, dist - 1);
@@ -2300,6 +2481,7 @@ public final class HybridBitmap implements Cloneable, Serializable,
       addEmptyWord(true);
     }
     return true;
+    
   }
 
   /**
@@ -2324,23 +2506,40 @@ public final class HybridBitmap implements Cloneable, Serializable,
    * @return true if the update was possible
    */
   public boolean setSizeInBits(final int size, final boolean defaultvalue) {
-	 if (size < this.sizeinbits)
+	 if (size <= this.sizeinbits)
       return false;
-    if (defaultvalue == false)
-      extendEmptyBits(this, this.sizeinbits, size);
-    else {
+//    if (defaultvalue == false)
+//      extendEmptyBits(this, this.sizeinbits, size);
+//    else {
       // next bit could be optimized
-      while (((this.sizeinbits % wordinbits) != 0) && (this.sizeinbits < size)) {
-        	this.set(this.sizeinbits);
-      }
+	 if((this.sizeinbits % wordinbits) != 0){
+		 long fillGap =0l;
+		 if(defaultvalue){
+			 fillGap = (1l<<(this.sizeinbits % wordinbits))-1;
+	     }
+		 this.sizeinbits += (this.sizeinbits % wordinbits);  
+	     this.addLiteralWord(fillGap);
+	 }
+	 
+//      while (((this.sizeinbits % wordinbits) != 0) && (this.sizeinbits < size)) {
+//        	this.set(this.sizeinbits);
+//      }
       this.addStreamOfEmptyWords(defaultvalue, (size / wordinbits)
         - this.sizeinbits / wordinbits);
       // next bit could be optimized
-      while (this.sizeinbits < size) {
-        	this.set(this.sizeinbits);
+      if(this.sizeinbits<size){
+      long newdata =0l;
+      if(defaultvalue){
+    	  newdata = (1l<<(size-this.sizeinbits))-1;
       }
-    }
-    this.sizeinbits = size;
+      this.sizeinbits += 64;  
+      this.addLiteralWord(newdata);
+      }
+//      while (this.sizeinbits < size) {
+//        	this.set(this.sizeinbits);
+//      }
+   // }
+    //this.sizeinbits = size;
     return true;
   }
 
@@ -2549,6 +2748,59 @@ public final class HybridBitmap implements Cloneable, Serializable,
     remaining.discharge(container);
     container.setSizeInBits(Math.max(sizeInBits(), a.sizeInBits()));
   }
+  
+  public void xorNotToContainer(final HybridBitmap a, final BitmapStorage container) {
+	    final EWAHIterator i = a.getEWAHIterator();
+	    final EWAHIterator j = getEWAHIterator();
+	    final IteratingBufferedRunningLengthWord rlwi = new IteratingBufferedRunningLengthWord(i);
+	    final IteratingBufferedRunningLengthWord rlwj = new IteratingBufferedRunningLengthWord(j);
+	    while ((rlwi.size()>0) && (rlwj.size()>0)) {
+	      while ((rlwi.getRunningLength() > 0) || (rlwj.getRunningLength() > 0)) {
+	        //final boolean i_is_prey = rlwi.getRunningLength() < rlwj.getRunningLength();
+	        //final IteratingBufferedRunningLengthWord prey = i_is_prey ? rlwi : rlwj;
+	       // final IteratingBufferedRunningLengthWord predator = i_is_prey ? rlwj : rlwi;
+	        if(rlwi.getRunningLength()>rlwj.getRunningLength()){ //rlwi is predator
+	    	  
+	    	  if (rlwi.getRunningBit() == true) {
+	          long index = rlwj.discharge(container, rlwi.getRunningLength()); 
+	          container.addStreamOfEmptyWords(false, rlwi.getRunningLength() - index);
+	          rlwi.discardFirstWords(rlwi.getRunningLength());
+	        } else {
+	          long index = rlwj.dischargeNegated(container, rlwi.getRunningLength()); 
+	          container.addStreamOfEmptyWords(true, rlwi.getRunningLength() - index);
+	          rlwi.discardFirstWords(rlwi.getRunningLength());
+	        }
+	        }else{ //rlwj is predator  //
+	        	if (rlwj.getRunningBit() == false) {
+	  	          long index = rlwi.dischargeNegated(container, rlwj.getRunningLength()); 
+	  	          container.addStreamOfEmptyWords(false, rlwj.getRunningLength() - index); //need to change to true? NO
+	  	        rlwj.discardFirstWords(rlwj.getRunningLength());
+	  	        } else {
+	  	          long index = rlwi.discharge(container, rlwj.getRunningLength()); 
+	  	          container.addStreamOfEmptyWords(true, rlwj.getRunningLength() - index); //need to change to false? NO
+	  	        rlwj.discardFirstWords(rlwj.getRunningLength());
+	  	        }
+	        }	  
+	      }
+	      final int nbre_literal = Math.min(rlwi.getNumberOfLiteralWords(),
+	        rlwj.getNumberOfLiteralWords());
+	      if (nbre_literal > 0) {
+	        for (int k = 0; k < nbre_literal; ++k)
+	          container.add(~(rlwi.getLiteralWordAt(k)) ^ rlwj.getLiteralWordAt(k));
+	        rlwi.discardFirstWords(nbre_literal);
+	        rlwj.discardFirstWords(nbre_literal);
+	      }
+	    }
+//	    if(rlwi.size()>0)
+//	    	rlwi.dischargeNegated(container,rlwi.getRunningLength());
+//	    else
+//	    	rlwj.discharge(container);
+	    //this is not correct here
+	    final boolean i_remains = rlwi.size()>0;	    
+	    final IteratingBufferedRunningLengthWord remaining = i_remains ? rlwi : rlwj;
+	    remaining.discharge(container);
+	    container.setSizeInBits(Math.max(sizeInBits(), a.sizeInBits()));
+	  }
   
   
  

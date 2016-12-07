@@ -274,8 +274,7 @@ public final class IteratingBufferedRunningLengthWord {
     BufferedRunningLengthWord runningLengthWord = initialWord;
     for (;;) {
       final long runningLength = runningLengthWord.getRunningLength();
-      container.addStreamOfEmptyWords(runningLengthWord.getRunningBit(),
-        runningLength);
+      container.addStreamOfEmptyWords(runningLengthWord.getRunningBit(), runningLength);
       container.addStreamOfLiteralWords(iterator.buffer(), iterator.literalWords()
         + runningLengthWord.literalwordoffset,
         runningLengthWord.getNumberOfLiteralWords());

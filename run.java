@@ -331,9 +331,9 @@ for(int dim=0; dim<14;dim++){
 }
 		
 
-		System.out.println("point queries: ");
-		System.out.println(avvTime+"\t"+accTime+"\t"+ahvTime+"\t"+ahcTime+"\t"+ahTime);
-		System.out.println(8*vvSize+"\t"+8*ccSize+"\t"+8*hvSize+"\t"+8*hcSize+"\t"+8*hSize);
+//		System.out.println("point queries: ");
+//		System.out.println(avvTime+"\t"+accTime+"\t"+ahvTime+"\t"+ahcTime+"\t"+ahTime);
+//		System.out.println(8*vvSize+"\t"+8*ccSize+"\t"+8*hvSize+"\t"+8*hcSize+"\t"+8*hSize);
 }		
 		
 //		int iterations =15;
